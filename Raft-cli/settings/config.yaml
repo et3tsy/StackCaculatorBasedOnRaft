@@ -1,0 +1,8 @@
+app:
+  name: "RaftCalculator-Client"
+  mod: "dev"
+
+client:
+  network: "tcp"
+  size: 3
+  addr: ["127.0.0.1:10091","127.0.0.1:10092","127.0.0.1:10093"]
