@@ -23,9 +23,7 @@ func (rf *Raft) applyEntry(index int64) {
 	// increment lastApplied
 	atomic.AddInt64(&rf.lastApplied, 1)
 
-	// fmt.Printf("[%v]Apply index: %v second!\n", rf.me, index)
-
-	// // apply the commands in log[index]
+	// apply the commands in log[index]
 	rf.applyCh <- models.ApplyMsg{
 		CommandValid: true,
 		IsLeader:     rf.getActAs() == ActAsLeader,

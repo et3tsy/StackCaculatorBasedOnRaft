@@ -26,6 +26,12 @@ func main() {
 		input, _ := inputReader.ReadString('\n')
 		input = strings.Replace(input, "\r\n", "", -1)
 
+		// do nothing
+		if input == "" {
+			continue
+		}
+
+		// quit
 		if input == "q" {
 			return
 		}
@@ -42,8 +48,7 @@ func main() {
 			args = append(args, v)
 		}
 
-		// to ensure the format of the arguments pass to
-		// server is valid
+		// to ensure the format of the arguments pass to server is valid
 		if !validate.Check(cmd, args) {
 			fmt.Println("Format error")
 			continue

@@ -6,9 +6,8 @@ import (
 	"sync/atomic"
 )
 
-// Implement AppendEntries RPC handler
-// Instead of Raft, RaftRPC is used to
-// be exposed to rpc.Register.
+// Implement AppendEntries RPC handler.
+// Instead of Raft, RaftRPC is used to be exposed to rpc.Register.
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) error {
 	// avoid concurrency problems between RPCs
 	rf.mu.Lock()
@@ -54,7 +53,8 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	return nil
 }
 
-// Call AppendEntries RPC handler.
+// Call AppendEntries RPC handler. If the server is
+// down, may return error. Comprise term when returning.
 func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *AppendEntriesReply) bool {
 	c, err := rpc.Dial(rf.network, rf.peers[server])
 	if err != nil {

@@ -18,10 +18,12 @@ func Make(rf *raft.Raft, applyCh <-chan models.ApplyMsg) *Calculator {
 	return &c
 }
 
+// Return how many instances.
 func (c *Calculator) GetNum() int64 {
 	return c.stackID
 }
 
+// When Raft applys some logs, nofities manager by applyCh.
 func (c *Calculator) listenAndApply(applyCh <-chan models.ApplyMsg) {
 	for {
 		req := <-applyCh

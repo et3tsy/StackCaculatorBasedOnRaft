@@ -1,5 +1,6 @@
 package validate
 
+// to validate the format of the instruction
 func Check(cmd string, args []int64) bool {
 	switch cmd {
 	case "create", "CREATE":

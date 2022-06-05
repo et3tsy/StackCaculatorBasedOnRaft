@@ -28,9 +28,7 @@ func (c *Calculator) Push(instanceID int64, x int64) error {
 	instance, ok := c.InstanceMap[instanceID]
 	if ok {
 		instance.data = append(instance.data, x)
-		c.InstanceMap[c.stackID] = &Instance{
-			data: instance.data,
-		}
+		c.InstanceMap[c.stackID] = instance
 		return nil
 	}
 	return fmt.Errorf("cannot find the instance")

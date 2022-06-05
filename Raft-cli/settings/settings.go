@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// to load viper
 func Init() (err error) {
 	viper.SetConfigFile("./settings/config.yaml") // 配置文件路径
 

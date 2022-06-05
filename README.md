@@ -7,6 +7,12 @@ Author: 谭升阳 19030100265
 
 
 
+## 设计说明&演示视频
+
+https://www.bilibili.com/video/BV1Ra41157dv/
+
+
+
 ## 设计需求
 
 ![WnqBC.png](https://s1.328888.xyz/2022/06/05/WnqBC.png)
@@ -28,7 +34,7 @@ Go官方提供了一个[RPC库](https://golang.org/pkg/net/rpc/): `net/rpc`。
 对于所有暴露的方法，均采用如下格式：
 
 ```
-func (t *T) MethodName(argType T1, replyType *T2) error
+func (t *T) MethodName(argType *T1, replyType *T2) error
 ```
 
 我们主要将`AppendEntriesRPC` 和 `RequestVoteRPC` 进行注册。但是，`net\rpc` 是利用反射机制将所有大写方法遍历完成注册的，所以这里我们如果在第二层中暴露了其他大写字母方法时，干脆就让 `net\rpc` 报错，不处理即可。
@@ -63,16 +69,71 @@ https://pdos.csail.mit.edu/6.824/labs/lab-raft.html
 
 每轮心跳时间一到，检测 Append 的新数据，并完成复制，这次视为一次心跳包。
 
-（3）为什么在进行回退 nextIndex、向 peers 进行 matching prev entry 的时候要捎带 nextIndex的数据块？
+（3）为什么在进行回退 nextIndex、向 peers 进行 matching prev entry 的时候要捎带 nextIndex 的数据块？
+
+这个特别难想，看似没有用，实则有大用。具体说明可以看视频解释。
 
 ### 第三层
 
 设计栈计算器，并且实现基于 Raft 设计用户交互。Raft 保证读写都是向 leader 发出的。
 
-设计读请求，需要保证当前读到的数据是最新的（not return stale data），按照论文提到的方案需要做到两点保证。一是，leader当选以后，主动 Append 一个空的 Entry，并且等到这个 Entry 被提交。这是为了当前的 leader 得到最新的 commitIndex。 当前 leader 可能虽然拥有最新的 Entry， 但是可能不知道它已经被提交了，旧 leader 提交的消息没传递过来（在选举的时候，他用当前最新的 Entry 向大多数获得的选票，但是，旧 leader 更新 commitIndex 的消息并没有通过 AppendEntries 传递过来。
+设计读请求，需要保证当前读到的数据是最新的（not return stale data），按照论文提到的方案需要做到两点保证。
+
+第一是，leader当选以后，主动 Append 一个空的 Entry，并且等到这个 Entry 被提交。这是为了当前的 leader 得到最新的 commitIndex。 当前 leader 可能虽然拥有最新的 Entry， 但是可能不知道它已经被提交了，旧 leader 提交的消息没传递过来（在选举的时候，他用当前最新的 Entry 向大多数获得的选票，但是，旧 leader 更新 commitIndex 的消息并没有通过 AppendEntries 传递过来。
 
 第二是，为了保证当前 leader 依然是 leader，它需要主动发一次心跳包，大多数的从机的 term 没有变化，就说明肯定没有新 leader 上任。
 
 ### 第四层
 
 利用TCP协程池处理用户请求。
+
+
+
+### 目录结构
+
+server
+
+```
+calculator 第三层计算器部分
+--calculator.go 创建计算器实例
+--handle.go 判断指令
+--instruction.go 执行具体指令对应语义
+--manager.go 对读写请求进行处理
+--models.go 定义模型
+models 定义底层模型
+--apply.go 定义应用信息
+--handle.go 定义处理信息
+network 网络处理
+--rpc.go 第一层 RPC 相关
+--client.go 第四层处理用户请求
+raft 第二层协议部分
+--AppendEntries.go 
+--RequesVote.go
+--models.go 定义raft模型
+--candidate.go 定义候选人的行为
+--leader.go 定义leader行为
+--getInfo.go 原子性读取数据
+--modify.go 完成各类更新操作
+--raft.go 暴露方法, 提供applyCh, 向上层通知应用信息
+settings viper 配置部分, 包括各类ip
+--config.yaml 配置
+--settings.go 加载viper
+main.go 主函数, 完成各类初始化
+
+```
+
+client
+
+```
+models 定义模型
+--models.go 定义模型
+network 网络
+--tcp.go 与集群建立tcp
+settings 设置
+--config.yaml 配置信息
+--settings.go 加载viper
+validate 校验数据语法
+--check.go 检查
+main.go
+```
+

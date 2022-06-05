@@ -4,6 +4,7 @@
 package calculator
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -165,6 +166,14 @@ func TestDecByTsy(t *testing.T) {
 	if v != 12 {
 		t.Error("div error")
 	}
+}
+
+func TestSthByTsy(t *testing.T) {
+	c, arr := CreateInit()
+	c.Push(arr[0], 2)
+	fmt.Println(arr[0], arr[1])
+	fmt.Println(c.Get(arr[0]))
+	fmt.Println(c.Get(arr[1]))
 }
 
 func CreateInit() (c *Calculator, arr []int64) {
